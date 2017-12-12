@@ -13,8 +13,37 @@
 #include <windows.h>
 #include <Windows.h>
 #include <windef.h>
+#include <string>
 
 using namespace std;
+
+/*
+#define BLACK "0"
+#define BLUE "1"
+#define GREEN "2"
+#define CYAN "3"
+#define RED "4"
+#define PURPLE "5"
+#define YELLOW "6"
+#define WHITE "7"
+#define GREY "8"
+#define LIGHTBLUE "9"
+#define LIGHTGREEN "A"
+#define LIGHTCYAN "B"
+#define LIGHTRED "C"
+#define LIGHTPURPLE "D"
+#define LIGHTYELLOW "E"
+
+string bg = to_string(RGB(0, 0, 0));
+string fc = to_string(RGB(0, 0, 0));
+*/
+
+struct rgb
+{
+	int r;
+	int g;
+	int b;
+};
 
 static class canvas
 {
@@ -28,10 +57,10 @@ protected:
 	COORD BGN1;
 	HDC hDC;
 	HANDLE StdOut;
-
 	COORD setCordScale(COORD, RECT);
 
 public:
+
 	canvas()
 	{
 		mov = 30;
@@ -127,7 +156,10 @@ BOOL rect::PlotRect(HDC hDC, HPEN hPen, int r,int g,int b)
 
 void rect::Delete()
 {
-	PEN = getPen(PS_SOLID, thick, RGB(0,0,0));
+	if (bg == "0")
+		PEN = getPen(PS_SOLID, thick, RGB(0, 0, 0));
+	else if (bg == "1")
+		PEN = getPen(PS_SOLID, thick, RGB(0,0,128));
 	SelectObject(hDC, PEN);
 	RECT a;
 	a.bottom = POS.Y;
@@ -135,7 +167,13 @@ void rect::Delete()
 	a.top = BGN.Y;
 	a.left = BGN.X;
 	Rectangle(hDC, BGN.X, BGN.Y, POS.X, POS.Y);
-	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
+	HBRUSH brush;
+	if (bg == "0")
+		brush = CreateSolidBrush(RGB(0, 0, 128));
+	else if (bg == "1")
+		 brush = CreateSolidBrush(RGB(0, 0, 128));
+	else
+		brush = CreateSolidBrush(RGB(0, 0, 0));
 	FillRect(hDC, &a, brush);
 	DeleteObject(brush);
 	DeleteObject(PEN);
@@ -290,4 +328,39 @@ public:
 int getmaxx(void) { return 640; }
 int getmaxy(void) { return 300; }
 
+/*
+class font :protected canvas
+{
+	PAINTSTRUCT ps;
+	HFONT hFont;
+	HDC hdc;
+public:
+	void cfont(string);
+	font()
+	{
+		 hdc = BeginPaint(hWnd, &ps);
+	}
+
+};
+
+void font::cfont(string f)
+{
+}
+*/
+
+void clear_text()
+{
+	system("cls");
+}
+rgb getPixel(int x, int y)
+{
+	rgb clr;
+	HDC dc = GetDC(NULL);
+	COLORREF color = GetPixel(dc, x, y);
+	ReleaseDC(NULL, dc);
+	clr.r = GetRValue(color);
+	clr.g = GetGValue(color);
+	clr.b = GetBValue(color);
+	return clr;
+}
 #endif
