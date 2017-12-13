@@ -156,10 +156,7 @@ BOOL rect::PlotRect(HDC hDC, HPEN hPen, int r,int g,int b)
 
 void rect::Delete()
 {
-	if (bg == "0")
 		PEN = getPen(PS_SOLID, thick, RGB(0, 0, 0));
-	else if (bg == "1")
-		PEN = getPen(PS_SOLID, thick, RGB(0,0,128));
 	SelectObject(hDC, PEN);
 	RECT a;
 	a.bottom = POS.Y;
@@ -168,11 +165,6 @@ void rect::Delete()
 	a.left = BGN.X;
 	Rectangle(hDC, BGN.X, BGN.Y, POS.X, POS.Y);
 	HBRUSH brush;
-	if (bg == "0")
-		brush = CreateSolidBrush(RGB(0, 0, 128));
-	else if (bg == "1")
-		 brush = CreateSolidBrush(RGB(0, 0, 128));
-	else
 		brush = CreateSolidBrush(RGB(0, 0, 0));
 	FillRect(hDC, &a, brush);
 	DeleteObject(brush);
@@ -328,25 +320,65 @@ public:
 int getmaxx(void) { return 640; }
 int getmaxy(void) { return 300; }
 
-/*
-class font :protected canvas
+
+class text :protected canvas
 {
 	PAINTSTRUCT ps;
 	HFONT hFont;
 	HDC hdc;
+	RECT rect;
 public:
-	void cfont(string);
-	font()
+	void cfont(string,int,...);
+	void txt(int,int,string);
+	text(int r,int g,int b)
 	{
-		 hdc = BeginPaint(hWnd, &ps);
+		hdc = GetDC(hWnd);
+		SetBkColor(hdc, RGB(0, 0, 0));
+		SetTextColor(hdc, RGB(r, g, b));
+
 	}
 
 };
 
-void font::cfont(string f)
+#define BOLD 1
+#define ITALIC 2
+#define UNDERLINE 3
+
+void text::cfont(string f,int size,...)
 {
+	va_list ap;
+	va_start(ap,f);
+	int bold = 400;
+	bool italic = FALSE, underline = FALSE;
+	for (int i = 0; i < 5; i++)
+	{
+		int k = va_arg(ap, int);
+		switch (k)
+		{
+		case 1:
+			bold = 700;
+			break;
+		case 2:
+			italic = true;
+			break;
+		case 3:
+			underline = true;
+			break;
+
+		}
+	}
+	wstring stemp = std::wstring(f.begin(), f.end());
+		hFont = CreateFont(size, 0, 0, 0, bold, italic, underline, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, stemp.c_str());
+	SelectObject(hdc, hFont);
 }
-*/
+
+void text::txt(int x,int y,string t)
+{
+	wstring stemp = std::wstring(t.begin(), t.end());
+	TextOut(hdc, x, y, stemp.c_str(),t.length());
+	EndPaint(hWnd, &ps);
+	ReleaseDC(hWnd, hdc);
+}
 
 void clear_text()
 {
